@@ -34,7 +34,7 @@ def my_function(arg1, arg2, ...):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--local_dir', default='~/verl/data/app')
+    parser.add_argument('--local_dir', default='./data/apps')
     parser.add_argument('--hdfs_dir', default=None)
     parser.add_argument('--template_type', type=str, default='base', choices=['base'])
 
@@ -47,7 +47,6 @@ if __name__ == '__main__':
 
     train_dataset = dataset['train']
     test_dataset = dataset['test']
-    
 
     def make_map_fn(split):
         def process_fn(example, idx):
@@ -64,11 +63,12 @@ if __name__ == '__main__':
                 "ability": "code_generation",
                 "reward_model": {
                     "style": "rule",
-                    "ground_truth": solution
+                    "ground_truth": example['input_output']
                 },
                 "extra_info": {
                     'split': split,
                     'index': idx,
+                    'solution': solution
                 }
             }
             return data
