@@ -12,7 +12,7 @@ import random
 import pdb
 
 
-def make_prefix(dp, template_type):
+def make_prefix(dp):
     # input_str = dp['input']
     input_str = """
 Please solve the below programming problem carefully. You should show your thinking process in <think> </think> tags. You should return the final answer as a complete Python function format in <answer> </answer> tags.
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     def make_map_fn(split):
         def process_fn(example, idx):
-            question = make_prefix(example, template_type=args.template_type)
+            question = make_prefix(example)
             solution = {
                 "target": example['solutions'],
             }
@@ -66,7 +66,8 @@ if __name__ == '__main__':
                 "extra_info": {
                     'split': split,
                     'index': idx,
-                    'solution': solution
+                    "prompt": question,
+                    'reference': solution
                 }
             }
             return data

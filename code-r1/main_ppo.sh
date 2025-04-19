@@ -19,7 +19,7 @@ fi
 
 # MAIN CONFIG
 MAX_EPOCHS=8
-DATASET=code-r1-12k
+DATASET=apps
 MODEL_PATH=Qwen/Qwen2.5-Coder-3B-Instruct
 ROLLOUT_N_SAMPLE=8
 ROLLOUT_N_QUERY=8
@@ -40,11 +40,11 @@ fi
 export VLLM_ATTENTION_BACKEND=XFORMERS
 
 python3 -m verl.trainer.main_ppo \
-    data.train_files=data/$DATASET/train.parquet \
-    data.val_files=data/$DATASET/test.parquet \
+    data.train_files=RL_SQA/code-r1/data/$DATASET/train.parquet \
+    data.val_files=RL_SQA/code-r1/data/$DATASET/test.parquet \
     data.train_batch_size=$ROLLOUT_N_QUERY \
-    data.max_prompt_length=2048 \
-    data.max_response_length=4096 \
+    data.max_prompt_length=1024 \
+    data.max_response_length=2048 \
     \
     actor_rollout_ref.model.path=$MODEL_PATH \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \

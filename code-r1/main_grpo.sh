@@ -19,8 +19,8 @@ fi
 
 # MAIN CONFIG
 MAX_EPOCHS=8
-DATASET=code-r1-12k
-MODEL_PATH=Qwen/Qwen2.5-3B-Instruct
+DATASET=apps
+MODEL_PATH=Qwen/Qwen2.5-Coder-3B-Instruct
 ROLLOUT_N_SAMPLE=8
 ROLLOUT_N_QUERY=8
 MICRO_BATCH_PER_GPU=8 # * GPUS_PER_NODE -> GLOBAL_BATCH_SIZE
@@ -41,8 +41,8 @@ export VLLM_ATTENTION_BACKEND=XFORMERS
 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=data/$DATASET/train.parquet \
-    data.val_files=data/$DATASET/test.parquet \
+    data.train_files=RL_SQA/code-r1/data/$DATASET/train.parquet \
+    data.val_files=RL_SQA/code-r1/data/$DATASET/test.parquet \
     data.train_batch_size=$ROLLOUT_N_QUERY \
     data.max_prompt_length=2048 \
     data.max_response_length=4096 \
