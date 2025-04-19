@@ -14,8 +14,7 @@ import pdb
 
 def make_prefix(dp, template_type):
     # input_str = dp['input']
-    if template_type == 'base':
-        input_str = """
+    input_str = """
 Please solve the below programming problem carefully. You should show your thinking process in <think> </think> tags. You should return the final answer as a complete Python function format in <answer> </answer> tags.
 For example:
 <think>
@@ -36,7 +35,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--local_dir', default='./data/apps')
     parser.add_argument('--hdfs_dir', default=None)
-    parser.add_argument('--template_type', type=str, default='base', choices=['base'])
 
     args = parser.parse_args()
 
@@ -92,14 +90,11 @@ if __name__ == '__main__':
     print(f"Average length of train dataset: {sum(lengths_list) / len(lengths_list)}")
     print(f"Average length of test dataset: {sum(lengths_list_test) / len(lengths_list_test)}")
     
-    local_dir = os.path.join(args.local_dir, args.template_type)
-    hdfs_dir = os.path.join(args.hdfs_dir, args.template_type) if args.hdfs_dir is not None else None
+    os.makedirs(args.local_dir, exist_ok=True)
     
-    os.makedirs(local_dir, exist_ok=True)
-    
-    train_dataset.to_parquet(os.path.join(local_dir, 'train.parquet'))
-    test_dataset.to_parquet(os.path.join(local_dir, 'test.parquet'))
+    train_dataset.to_parquet(os.path.join(args.local_dir, 'train.parquet'))
+    test_dataset.to_parquet(os.path.join(args.local_dir, 'test.parquet'))
 
-    if hdfs_dir is not None:
-        makedirs(hdfs_dir)
-        copy(src=local_dir, dst=hdfs_dir)
+    if args.hdfs_dir is not None:
+        makedirs(args.hdfs_dir)
+        copy(src=args.local_dir, dst=args.hdfs_dir)

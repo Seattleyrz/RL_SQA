@@ -23,7 +23,7 @@ def extract_solution(solution_str):
         return matches[-1].strip(), solution_str  # Return the last matched answer
     else:
         print("[Error] No valid answer tags found")
-        return None, solution_str
+        return "", solution_str
         
 
 def validate_response_structure(processed_str: str, do_print: bool) -> bool:
@@ -74,27 +74,95 @@ def validate_response_structure(processed_str: str, do_print: bool) -> bool:
     return validation_passed
   
     
-def calculate_answer_score(answer_text, label, do_print=False, search_api=None, literature_type='publication', pub_date=None):
-    """Calculate answer score based on document recall."""
-
-    # TODO: Compute answer score based on how many test cases are passed 
-    answer_score = 0
+def calculate_answer_score(answer_text, test_cases, do_print=False):
+    """Calculate answer score based on how many test cases are passed.
     
+    Args:
+        answer_text: The extracted answer from the LLM response
+        test_cases: List of ground truth test cases or expected answers
+        do_print: Whether to print debug information
+        
+    Returns:
+        Float score indicating the quality of the answer
+    """
+    if do_print:
+        print("\n[Answer Validation]")
+        print(f"  Answer text: {answer_text}")
+        print(f"  Expected: {test_cases}")
+    
+    # If label is not a list (single test case), convert to list for consistent processing
+    if not isinstance(test_cases, list):
+        test_cases = [test_cases]
+    
+    # Handle empty answer
+    if not answer_text or answer_text.strip() == "":
+        if do_print:
+            print("  [Error] Empty answer")
+        return -1.0
+    
+    # try:
+    #     # Try to parse the answer if it's in a specific format (e.g., JSON)
+    #     try:
+    #         parsed_answer = json.loads(answer_text)
+    #     except json.JSONDecodeError:
+    #         # If not JSON, keep the original text
+    #         parsed_answer = answer_text
+        
+    #     # Count passed test cases
+    #     passed_cases = 0
+    #     total_cases = len(test_cases)
+        
+    #     for i, test_case in enumerate(test_cases):
+    #         # Compare the answer with the test case
+    #         # This may need customization based on the specific test case format
+    #         if isinstance(test_case, dict) and isinstance(parsed_answer, dict):
+    #             # If test cases are dictionaries, check if all key-value pairs match
+    #             case_passed = all(parsed_answer.get(k) == v for k, v in test_case.items())
+    #         elif isinstance(test_case, list) and isinstance(parsed_answer, list):
+    #             # If test cases are lists, check if they have the same elements
+    #             case_passed = sorted(parsed_answer) == sorted(test_case)
+    #         else:
+    #             # For simple string/number comparison
+    #             case_passed = str(parsed_answer).strip() == str(test_case).strip()
+            
+    #         if case_passed:
+    #             passed_cases += 1
+    #             if do_print:
+    #                 print(f"  Test case {i+1}: PASSED")
+    #         else:
+    #             if do_print:
+    #                 print(f"  Test case {i+1}: FAILED (Expected: {test_case}, Got: {parsed_answer})")
+        
+    #     # Calculate score based on passed test cases
+    #     if total_cases > 0:
+    #         pass_rate = passed_cases / total_cases
+    #         answer_score = 9.0 * pass_rate  # Scale to max 9 points
+            
+    #         # Bonus for passing all test cases
+    #         if passed_cases == total_cases:
+    #             answer_score += 1.0  # Maximum score is 10
+    #     else:
+    #         answer_score = 0.0
+            
+    #     if do_print:
+    #         print(f"  Passed {passed_cases}/{total_cases} test cases")
+    #         print(f"  Answer score: {answer_score}")
+            
+    answer_score = 0.0
     return answer_score
+        
+    # except Exception as e:
+    #     if do_print:
+    #         print(f"  [Error] Failed to evaluate answer: {str(e)}")
+    #     return -1.0
 
-def compute_score(solution_str, ground_truth, format_reward=1, answer_reward=1., search_api=None, literature_type='publication', pub_date=None):
+def compute_score(solution_str, ground_truth):
     """The scoring function for countdown task.
     
     Args:
         solution_str: the solution text
-        ground_truth: dictionary containing target number and available numbers
-        method: the method to extract the solution
-        format_score: the score for correct format but wrong answer
-        score: the score for the correct answer
+        ground_truth: list of ground truth test cases
     """
-
-    # label is a list of groundtruth pmids
-    label = ground_truth['target']
     
     answer_text, processed_str = extract_solution(solution_str)
     
@@ -102,27 +170,21 @@ def compute_score(solution_str, ground_truth, format_reward=1, answer_reward=1.,
 
     # Validate response structure
     response_format_correct = validate_response_structure(processed_str, do_print)
-    format_correct = response_format_correct
-
-    format_score = 1 if format_correct else -4
-
+    
+    if not response_format_correct:
+        return -1.0
     
     if do_print:
         print(f"--------------------------------")
         print(f"Solution string: {solution_str}")
-        print(f"Target: {str(label)} |")
+        print(f"Target: {ground_truth} |")
     
-    answer_score = 0
-    if format_correct and answer_text:
-        answer_score = calculate_answer_score(answer_text, label, do_print, search_api, literature_type, pub_date)
+    answer_score = calculate_answer_score(answer_text, ground_truth, do_print)
 
-    total_score = format_score + answer_score
     if do_print:
         print("\n" + "-"*80)
         print(f" Final Score ".center(80, '-'))
-        print(f"  Format: {format_score}")
-        print(f"  Answer: {answer_score}")
-        print(f"  Total: {total_score}")
+        print(f"  Total: {answer_score}")
         print("="*80 + "\n")
 
-    return total_score
+    return answer_score
