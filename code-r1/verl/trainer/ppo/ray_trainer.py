@@ -891,6 +891,7 @@ class RayPPOTrainer(object):
         self.global_steps += 1
 
         for epoch in range(self.config.trainer.total_epochs):
+            print(f"Epoch {epoch} of {self.config.trainer.total_epochs}")
             for batch_dict in self.train_dataloader:
                 metrics = {}
                 timing_raw = {}

@@ -41,8 +41,8 @@ export VLLM_ATTENTION_BACKEND=XFORMERS
 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
-    data.train_files=RL_SQA/code-r1/data/$DATASET/train.parquet \
-    data.val_files=RL_SQA/code-r1/data/$DATASET/test.parquet \
+    data.train_files=/workspace/RL_SQA/code-r1/data/$DATASET/train.parquet \
+    data.val_files=/workspace/RL_SQA/code-r1/data/$DATASET/test.parquet \
     data.train_batch_size=$ROLLOUT_N_QUERY \
     data.max_prompt_length=2048 \
     data.max_response_length=4096 \
@@ -74,5 +74,6 @@ python3 -m verl.trainer.main_ppo \
     trainer.save_freq=64 \
     trainer.test_freq=16 \
     trainer.total_epochs=$MAX_EPOCHS \
+    +trainer.val_before_train=False \
     reward_model.reward_manager=prime $@ 2>&1 | tee grpo.log
 

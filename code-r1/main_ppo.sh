@@ -18,10 +18,10 @@ fi
 #    main_ppo.py:main_task - and comment "Role.RefPolicy..." in "role_worker_mapping = ".
 
 # MAIN CONFIG
-MAX_EPOCHS=8
+MAX_EPOCHS=5
 DATASET=apps
 MODEL_PATH=Qwen/Qwen2.5-Coder-3B-Instruct
-ROLLOUT_N_SAMPLE=8
+ROLLOUT_N_SAMPLE=8  
 ROLLOUT_N_QUERY=8
 MICRO_BATCH_PER_GPU=8 # * GPUS_PER_NODE -> GLOBAL_BATCH_SIZE
 GRAD_ACC_STEPS=4
@@ -40,8 +40,8 @@ fi
 export VLLM_ATTENTION_BACKEND=XFORMERS
 
 python3 -m verl.trainer.main_ppo \
-    data.train_files=RL_SQA/code-r1/data/$DATASET/train.parquet \
-    data.val_files=RL_SQA/code-r1/data/$DATASET/test.parquet \
+    data.train_files=/workspace/RL_SQA/code-r1/data/$DATASET/train.parquet \
+    data.val_files=/workspace/RL_SQA/code-r1/data/$DATASET/test.parquet \
     data.train_batch_size=$ROLLOUT_N_QUERY \
     data.max_prompt_length=1024 \
     data.max_response_length=2048 \
@@ -80,10 +80,11 @@ python3 -m verl.trainer.main_ppo \
     trainer.project_name='code-r1' \
     trainer.experiment_name=${DATASET}-ppo \
     trainer.nnodes=1 \
-    trainer.default_local_dir=./models/${DATASET}-ppo \
+    trainer.default_local_dir=/workspace/RL_SQA/code-r1/models/${DATASET}-ppo \
     trainer.n_gpus_per_node=$GPUS_PER_NODE \
     trainer.save_freq=32 \
     trainer.test_freq=8 \
     trainer.resume_mode=auto \
+    +trainer.val_before_train=False \
     trainer.total_epochs=$MAX_EPOCHS \
     reward_model.reward_manager=prime $@ 2>&1 | tee ppo.log

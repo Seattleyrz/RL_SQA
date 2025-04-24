@@ -30,7 +30,7 @@ def _default_compute_score(data_source, solution_str, ground_truth, extra_info=N
     elif data_source in ['codecontests', 'apps', 'codeforces', 'taco']:
         from . import prime_code
         res = prime_code.compute_score(solution_str, ground_truth, continuous=True)
-    elif data_source in ['code']:
+    elif data_source in ['code', 'codeparrot/apps']:
         from . import coder1
         res = coder1.compute_score(solution_str, ground_truth, extra_info=extra_info)
     elif data_source in ['hiyouga/geometry3k']:
